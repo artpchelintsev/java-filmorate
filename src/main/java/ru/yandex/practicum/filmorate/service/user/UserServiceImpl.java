@@ -75,12 +75,12 @@ public class UserServiceImpl implements UserService {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
 
-        if (user.getFriends() == null || !user.getFriends().contains(friendId)) {
-            throw new NotFoundException("Пользователь с id=" + friendId + " не найден в друзьях.");
+        if (user.getFriends() != null && user.getFriends().contains(friendId)) {
+            user.getFriends().remove(friendId);
         }
-
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+        if (friend.getFriends() != null && friend.getFriends().contains(userId)) {
+            friend.getFriends().remove(userId);
+        }
     }
 
     @Override
