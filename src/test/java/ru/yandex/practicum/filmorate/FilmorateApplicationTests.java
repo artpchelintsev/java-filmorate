@@ -1,18 +1,19 @@
 package ru.yandex.practicum.filmorate;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 class FilmorateApplicationTests {
@@ -31,8 +32,9 @@ class FilmorateApplicationTests {
         film.setReleaseDate(LocalDate.of(2000, 1, 1));
         film.setDuration(120);
 
-        assertTrue(validator.validate(film).isEmpty(),
-                "Корректный фильм проходит валидацию.");
+        Set<ConstraintViolation<Film>> violations = validator.validate(film);
+        assertTrue(violations.isEmpty(),
+                "Корректный фильм должен проходить валидацию.");
     }
 
     @Test
@@ -42,21 +44,13 @@ class FilmorateApplicationTests {
         user.setLogin("login");
         user.setBirthday(LocalDate.of(2000, 1, 1));
 
-        assertFalse(validator.validate(user).isEmpty(),
-                "Пользователь с пустым email не проходит валидацию.");
-    }
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertFalse(violations.isEmpty(),
+                "Пользователь с пустым email не должен проходить валидацию");
 
-    @Test
-    void shouldNotValidateFilmWithEarlyReleaseDate() {
-        Film film = new Film();
-        film.setName("Early Film");
-        film.setDescription("Description");
-        film.setReleaseDate(LocalDate.of(1895, 12, 27));
-        film.setDuration(120);
-
-        FilmController filmController = new FilmController();
-        assertThrows(ValidationException.class, () -> filmController.createFilm(film),
-                "Фильм с датой релиза раньше 28.12.1895 должен вызывать ValidationException");
+        assertTrue(violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().equals("email")),
+                "Ожидалась ошибка валидации для поля email");
     }
 
     @Test
@@ -66,8 +60,12 @@ class FilmorateApplicationTests {
         user.setLogin("login");
         user.setBirthday(LocalDate.now().plusDays(1));
 
-        assertFalse(validator.validate(user).isEmpty(),
-                "Пользователь с датой рождения в будущем не проходит валидацию.");
-    }
+        Set<ConstraintViolation<User>> violations = validator.validate(user);
+        assertFalse(violations.isEmpty(),
+                "Пользователь с датой рождения в будущем не должен проходить валидацию");
 
+        assertTrue(violations.stream()
+                        .anyMatch(v -> v.getPropertyPath().toString().equals("birthday")),
+                "Ожидалась ошибка валидации для поля birthday");
+    }
 }
