@@ -3,7 +3,7 @@ Template repository for Filmorate project.
 
 Диаграмма базы данных.
 
-/assets/images/DataBase schema.png
+<picture>https://github.com/artpchelintsev/java-filmorate/blob/database_diagram/README.md#:~:text=DataBase,-schema.png</picture>
 
 * users  информация о пользователях
 * friends информация о друзьях 
