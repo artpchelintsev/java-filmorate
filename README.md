@@ -1,9 +1,9 @@
 # java-filmorate
 Template repository for Filmorate project.
 
-Диаграмма базы данных.
+## Диаграмма базы данных.
 
-<picture>https://github.com/artpchelintsev/java-filmorate/blob/database_diagram/README.md#:~:text=DataBase,-schema.png</picture>
+![DataBaseSchema.png](assets/images/DataBaseSchema.png)
 
 * users  информация о пользователях
 * friends информация о друзьях 
