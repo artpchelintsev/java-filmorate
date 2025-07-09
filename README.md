@@ -3,5 +3,5 @@ Template repository for Filmorate project.
 
 Диаграмма базы данных.
 
-/assets/images/DataBase schema.png
+<picture>/assets/images/DataBase schema.png</picture>
 
