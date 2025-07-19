@@ -6,5 +6,6 @@ import java.util.Collection;
 
 public interface MpaService {
     Collection<MpaRating> getAllMpaRatings();
+
     MpaRating getMpaRatingById(int id);
 }

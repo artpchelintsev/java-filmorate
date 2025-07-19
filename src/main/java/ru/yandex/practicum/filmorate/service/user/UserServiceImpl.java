@@ -83,8 +83,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<User> getCommonFriends(Long userId, Long otherId) {
-            getUserById(userId);
-            getUserById(otherId);
-            return userStorage.getCommonFriends(userId, otherId);
-        }
+        getUserById(userId);
+        getUserById(otherId);
+        return userStorage.getCommonFriends(userId, otherId);
+    }
 }

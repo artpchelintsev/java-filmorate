@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.service.mpa;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.storage.dao.MpaDao;
 
 import java.util.Collection;
 
