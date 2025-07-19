@@ -10,8 +10,3 @@ MERGE INTO genres (genre_id, genre_name) VALUES (3, 'Мультфильм');
 MERGE INTO genres (genre_id, genre_name) VALUES (4, 'Триллер');
 MERGE INTO genres (genre_id, genre_name) VALUES (5, 'Документальный');
 MERGE INTO genres (genre_id, genre_name) VALUES (6, 'Боевик');
-
-
--- Тестовый пользователь
-MERGE INTO users (user_id, email, login, name, birthday)
-VALUES (1, 'test@example.com', 'testlogin', 'Test User', '1993-03-31');
