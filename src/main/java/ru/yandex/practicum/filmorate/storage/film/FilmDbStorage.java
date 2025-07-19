@@ -72,32 +72,21 @@ public class FilmDbStorage implements FilmStorage {
                 }
             }
         }
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM films", Long.class);
-        if (count == 0) {
-            String sql = "INSERT INTO films (film_id, name, description, release_date, duration, rating_id) " +
-                    "VALUES (1, ?, ?, ?, ?, ?)";
-            jdbcTemplate.update(sql,
-                    film.getName(),
-                    film.getDescription(),
-                    film.getReleaseDate(),
-                    film.getDuration(),
-                    film.getMpa() != null ? film.getMpa().getId() : null);
-            film.setId(1L);
-        } else {
-            SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                    .withTableName("films")
-                    .usingGeneratedKeyColumns("film_id");
 
-            Map<String, Object> values = new HashMap<>();
-            values.put("name", film.getName());
-            values.put("description", film.getDescription());
-            values.put("release_date", film.getReleaseDate());
-            values.put("duration", film.getDuration());
-            values.put("rating_id", film.getMpa() != null ? film.getMpa().getId() : null);
+        SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("films")
+                .usingGeneratedKeyColumns("film_id");
 
-            Number id = simpleJdbcInsert.executeAndReturnKey(values);
-            film.setId(id.longValue());
-        }
+        Map<String, Object> values = new HashMap<>();
+        values.put("name", film.getName());
+        values.put("description", film.getDescription());
+        values.put("release_date", film.getReleaseDate());
+        values.put("duration", film.getDuration());
+        values.put("rating_id", film.getMpa() != null ? film.getMpa().getId() : null);
+
+        Number id = simpleJdbcInsert.executeAndReturnKey(values);
+        film.setId(id.longValue());
+
 
         if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
