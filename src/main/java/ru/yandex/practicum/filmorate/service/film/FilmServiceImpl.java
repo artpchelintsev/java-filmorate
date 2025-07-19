@@ -1,28 +1,31 @@
 package ru.yandex.practicum.filmorate.service.film;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.mpa.MpaService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final MpaService mpaService;
 
     @Autowired
-    public FilmServiceImpl(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmServiceImpl(
+            @Qualifier("filmDbStorage") FilmStorage filmStorage,
+            @Qualifier("userDbStorage") UserStorage userStorage, MpaService mpaService) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.mpaService = mpaService;
     }
 
     @Override
@@ -33,6 +36,14 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film createFilm(Film film) {
         validateFilm(film);
+        if (film.getMpa() != null) {
+            try {
+                mpaService.getMpaRatingById(film.getMpa().getId());
+            } catch (NotFoundException e) {
+                throw new NotFoundException("MPA рейтинг с id=" + film.getMpa().getId() + " не найден");
+            }
+        }
+
         return filmStorage.createFilm(film);
     }
 
@@ -60,10 +71,7 @@ public class FilmServiceImpl implements FilmService {
         if (userStorage.getUserById(userId) == null) {
             throw new NotFoundException("Пользователь с id=" + userId + " не найден.");
         }
-        if (film.getLikes() == null) {
-            film.setLikes(new HashSet<>());
-        }
-        film.getLikes().add(userId);
+        filmStorage.addLike(filmId, userId);
     }
 
     @Override
@@ -72,18 +80,12 @@ public class FilmServiceImpl implements FilmService {
         if (userStorage.getUserById(userId) == null) {
             throw new NotFoundException("Пользователь с id=" + userId + " не найден.");
         }
-        if (film.getLikes() == null || !film.getLikes().contains(userId)) {
-            throw new NotFoundException("Лайк от пользователя с id=" + userId + " не найден.");
-        }
-        film.getLikes().remove(userId);
+        filmStorage.removeLike(filmId, userId);
     }
 
     @Override
     public Collection<Film> getPopularFilms(int count) {
-        return filmStorage.getAllFilms().stream()
-                .sorted(Comparator.comparingInt(f -> -f.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopularFilms(count);
     }
 
     private void validateFilm(Film film) {

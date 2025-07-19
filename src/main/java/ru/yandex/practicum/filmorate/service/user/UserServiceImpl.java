@@ -1,23 +1,20 @@
 package ru.yandex.practicum.filmorate.service.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage) {
+    public UserServiceImpl(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -59,55 +56,35 @@ public class UserServiceImpl implements UserService {
         User user = getUserById(userId);
         User friend = getUserById(friendId);
 
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
-        }
-        if (friend.getFriends() == null) {
-            friend.setFriends(new HashSet<>());
-        }
+        userStorage.addFriend(userId, friendId);
+    }
 
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+    @Override
+    public void confirmFriend(Long userId, Long friendId) {
+        getUserById(userId);
+        getUserById(friendId);
+
+        userStorage.confirmFriend(userId, friendId);
     }
 
     @Override
     public void removeFriend(Long userId, Long friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
+        getUserById(userId);
+        getUserById(friendId);
 
-        if (user.getFriends() != null && user.getFriends().contains(friendId)) {
-            user.getFriends().remove(friendId);
-        }
-        if (friend.getFriends() != null && friend.getFriends().contains(userId)) {
-            friend.getFriends().remove(userId);
-        }
+        userStorage.removeFriend(userId, friendId);
     }
 
     @Override
     public Collection<User> getFriends(Long userId) {
-        User user = getUserById(userId);
-        if (user.getFriends() == null) {
-            return new ArrayList<>();
-        }
-        return user.getFriends().stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+        getUserById(userId);
+        return userStorage.getFriends(userId);
     }
 
     @Override
     public Collection<User> getCommonFriends(Long userId, Long otherId) {
-        User user = getUserById(userId);
-        User otherUser = getUserById(otherId);
-
-        if (user.getFriends() == null || otherUser.getFriends() == null) {
-            return new ArrayList<>();
+            getUserById(userId);
+            getUserById(otherId);
+            return userStorage.getCommonFriends(userId, otherId);
         }
-
-        Set<Long> commonFriendIds = new HashSet<>(user.getFriends());
-        commonFriendIds.retainAll(otherUser.getFriends());
-
-        return commonFriendIds.stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
-    }
 }
